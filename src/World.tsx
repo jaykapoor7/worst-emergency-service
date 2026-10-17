@@ -18,6 +18,7 @@ export default function World({
   onHud,
   onSecret,
   celebrate,
+  impact,
 }: {
   world: WorldState;
   event: Emergency;
@@ -26,6 +27,7 @@ export default function World({
   onHud: (h: Hud) => void;
   onSecret: () => void;
   celebrate: boolean;
+  impact?: { x: number; y: number };
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const latest = useRef({
@@ -51,10 +53,7 @@ export default function World({
       canvas.current?.focus({ preventScroll: true });
       if (window.innerWidth < 760)
         canvas.current?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "instant"
-            : "smooth",
+          behavior: "instant",
           block: "center",
         });
     }
@@ -89,7 +88,7 @@ export default function World({
           if (
             p.operation.finished &&
             p.operation.result &&
-            p.operation.settle > 1.05
+            p.operation.settle > 0.62
           )
             p.onFinish(p.operation.result);
           else if (now - hudAt > 100) {
@@ -131,6 +130,7 @@ export default function World({
   return (
     <canvas
       ref={canvas}
+      style={impact ? { transformOrigin: `${impact.x / 10}% ${impact.y / 6.4}%` } : undefined}
       tabIndex={operation ? 0 : -1}
       role={operation ? "application" : "img"}
       aria-label={
@@ -146,13 +146,13 @@ export default function World({
         }
         e.currentTarget.setPointerCapture(e.pointerId);
         operation.held = true;
-        if (operation.kind !== "timing") operation.point(p.x, p.y);
+        operation.point(p.x, p.y);
       }}
       onPointerMove={(e) => {
         if (
           operation?.held &&
           operation.shotTime < 0 &&
-          operation.kind !== "timing"
+          !operation.finished
         ) {
           const p = point(e);
           operation.point(p.x, p.y);
@@ -161,7 +161,7 @@ export default function World({
       onPointerUp={() => {
         if (!operation?.held) return;
         operation.held = false;
-        if (["rescue", "launch"].includes(operation.kind)) operation.act();
+        operation.release();
       }}
       onPointerCancel={() => {
         if (operation) operation.held = false;

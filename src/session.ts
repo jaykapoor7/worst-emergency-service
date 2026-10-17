@@ -9,12 +9,17 @@ export function complete(
   const e = getEvent(s.eventId),
     r = e.responses[choice],
     world = resolve(s.world, e, r, outcome);
+  const catMisses = [
+    "The line missed the cat. The firefighter climbed the tree anyway and is now stuck above it.",
+    "The dinosaur missed the tree. The cat is still up there. The dinosaur has found the neighbour's house.",
+    "The tree survived. The pavement did not. The pigeons are filing a property claim.",
+  ];
   return {
     world,
     eventId: e.id,
     phase: "result",
     report: {
-      text: r.result,
+      text: e.id === "cat" && outcome.score < 55 ? catMisses[choice] : r.result,
       score: outcome.score,
       label: r.label,
       assessment:

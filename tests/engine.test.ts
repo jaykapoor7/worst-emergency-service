@@ -36,10 +36,25 @@ test("The opening creates distinct causal follow-up calls", () => {
     assert.ok(w.catSaved);
   }
 });
-test("Steering input moves a response, reaches a target, and produces quality", () => {
+test("National and cosmic calls stay locked until their promotion tier", () => {
+  const early = fresh(1);
+  early.count = 2;
+  early.next = "moon";
+  assert.notEqual(pick(early).id, "moon");
+  early.count = 25;
+  assert.equal(pick(early).id, "moon");
+});
+test("A local consequence can still create an early municipal callback", () => {
+  const w = fresh(1);
+  w.count = 2;
+  w.next = "dino-job";
+  w.effects.dinosaur = 1;
+  assert.equal(pick(w).id, "dino-job");
+});
+test("One drag places a response at the chosen point", () => {
   const op = new Operation("steer", "dinosaur", [250, 340]);
   op.point(250, 340);
-  step(op, 7);
+  op.release();
   assert.ok(op.finished);
   assert.ok(op.result!.score > 70);
   assert.ok(Math.hypot(op.result!.x - 250, op.result!.y - 340) < 46);
@@ -47,67 +62,53 @@ test("Steering input moves a response, reaches a target, and produces quality", 
 test("A bad steering response fails forward without removing its consequences", () => {
   const op = new Operation("steer", "dinosaur", [250, 340]);
   op.point(920, 550);
-  step(op, 14);
+  op.release();
   assert.ok(op.finished);
   assert.ok(op.result!.score < 40);
   const w = resolve(fresh(1), events[0], events[0].responses[1], op.result!);
   assert.equal(w.effects.dinosaur, 1);
   assert.ok(w.damage > 0);
+  assert.deepEqual(w.anchors?.dinosaur, [{ x: 920, y: 550 }]);
+  assert.equal(w.flags.treeRemoved, false);
+  assert.equal(w.catSaved, false);
 });
-test("Magnet collects actual cars and delivers them to the depot", () => {
+test("A single magnet sweep collects cars and fixes the pile's location", () => {
   const op = new Operation("magnet", "magnet", [820, 525]);
   for (const car of op.cars) {
     op.point(car.x, car.y);
-    step(op, 3.2);
   }
-  op.point(820, 525);
-  step(op, 2.5);
+  op.release();
   assert.equal(op.pickup.size, 3);
   assert.ok(op.finished);
-  assert.ok(op.result!.score > 60);
+  assert.equal(op.result!.x, 750);
+  assert.equal(op.result!.score, 100);
 });
-test("Rescue aim affects the final accuracy", () => {
+test("A single rescue aim affects the final accuracy", () => {
   const good = new Operation("rescue", "helicopter", [250, 340]);
   good.point(215, 340);
-  for (let i = 0; i < 3; i++) {
-    good.act();
-    step(good, 1.5);
-  }
+  good.release();
   step(good, 1);
   assert.equal(good.result!.score, 100);
   const bad = new Operation("rescue", "helicopter", [250, 340]);
   bad.point(850, 340);
-  for (let i = 0; i < 3; i++) {
-    bad.act();
-    step(bad, 1.5);
-  }
+  bad.release();
   step(bad, 1);
   assert.equal(bad.result!.score, 0);
 });
-test("Launch uses an arc, wind offset, and two deliberate deliveries", () => {
+test("Launch uses one deliberate shot, an arc, and wind offset", () => {
   const op = new Operation("launch", "cone", [660, 350]);
   op.point(595, 350);
   op.act();
   step(op, 0.6);
   assert.ok(op.shotY < 300);
   step(op, 1);
-  op.act();
-  step(op, 4);
   assert.ok(op.finished);
   assert.equal(op.result!.score, 100);
 });
-test("Timing input records three separate authorizations", () => {
+test("A demolition charge is placed with one tap", () => {
   const op = new Operation("timing", "stamp", [500, 300]);
-  op.start();
-  for (let i = 0; i < 3; i++) {
-    let guard = 0;
-    while (Math.abs(op.needle() - 68) > 2 || op.time - op.lastStamp < 0.8) {
-      op.tick(1 / 60);
-      if (guard++ > 1000) throw Error("needle failed");
-    }
-    op.act();
-  }
-  step(op, 5);
+  op.point(500, 300);
+  op.release();
   assert.ok(op.finished);
   assert.ok(op.result!.score > 90);
 });
@@ -171,28 +172,18 @@ test("Thirty uninterrupted operations use the real session loop, award President
     const op = new Operation(r.mechanic, r.tool, target);
     if (op.kind === "steer") {
       op.point(...target);
-      step(op, 13.1);
+      op.release();
     } else if (op.kind === "magnet") {
-      for (const car of op.cars) {
-        op.point(car.x, car.y);
-        step(op, 3);
-      }
+      for (const car of op.cars) op.point(car.x, car.y);
       op.point(...target);
-      step(op, 4);
+      op.release();
     } else if (op.kind === "timing") {
-      op.start();
-      for (let j = 0; j < 3; j++) {
-        step(op, 1);
-        op.act();
-      }
-      step(op, 10);
+      op.point(...target);
+      op.release();
     } else {
       op.point(target[0] - (op.kind === "launch" ? 65 : 35), target[1]);
-      for (let j = 0; j < (op.kind === "launch" ? 2 : 3); j++) {
-        op.act();
-        step(op, 1.4);
-      }
-      step(op, 3);
+      op.release();
+      step(op, 1);
     }
     assert.ok(op.finished, `${i}:${op.kind} unfinished`);
     s = complete(s, i % 3, op.result!);

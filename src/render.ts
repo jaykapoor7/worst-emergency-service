@@ -1353,15 +1353,16 @@ export function render(
     );
     car(c, 1050 - ((t * 23 + 430) % 1150), 452, "#d2b967", -1);
   } else {
+    const pile = w.anchors?.magnet?.at(-1) || { x: 830, y: 439 };
     for (let i = 0; i < Math.min(5, fx.magnet + 1); i++)
       car(
         c,
-        790 + (i % 2) * 28,
-        471 - Math.floor(i / 2) * 18,
+        pile.x - 40 + (i % 2) * 28,
+        pile.y + 32 - Math.floor(i / 2) * 18,
         ["#d7b268", "#c66c56", "#879eab"][i % 3],
         i % 2 ? 1 : -1,
       );
-    magnet(c, 830, 439);
+    magnet(c, pile.x, pile.y);
   }
   car(c, 120, 545, "#c75e46");
   rect(c, 99, 524, 16, 4, "#f0d6a5", 1);
@@ -1419,7 +1420,7 @@ export function render(
   );
   // Persistent effects and cross-system visual callbacks.
   if (fx.flood) {
-    const depth = fx.flood * 6;
+    const depth = Math.min(152, 36 + fx.flood * 32);
     c.beginPath();
     c.moveTo(0, 568 - depth);
     for (let x = 0; x <= 1000; x += 20)
@@ -1442,15 +1443,19 @@ export function render(
   }
   if (fx.dinosaur) {
     const count = Math.min(3, fx.dinosaur);
-    for (let i = 0; i < count; i++)
+    const dinoCall = e.id === "dino-house" && w.recent.at(-1) !== e.id;
+    for (let i = 0; i < count; i++) {
+      const place = w.anchors?.dinosaur?.at(-(i + 1)) ||
+        { x: 220 + i * 165, y: 440 + (i % 2) * 84 };
       dinosaur(
         c,
-        220 + i * 165 + Math.sin(t * 0.23 + i) * 22,
-        440 + (i % 2) * 84,
+        i === 0 && dinoCall ? 365 + Math.sin(t * 2) * 4 : place.x + Math.sin(t * 0.23 + i) * 12,
+        i === 0 && dinoCall ? 336 : fx.flood ? Math.max(place.y, 568 - Math.min(152, 36 + fx.flood * 32) + 24) : place.y,
         t + i,
         0.68 + i * 0.13,
         fx.flood > 0,
       );
+    }
     if (fx.alien) {
       rect(c, 186, 331, 52, 14, "#eadab2", 2, ink);
       text(c, "DIPLOMAT", 212, 341, 6);
@@ -1468,25 +1473,28 @@ export function render(
     tool(c, "boat", 676, 414, t, 0.55);
   }
   if (fx.alien) {
-    ufo(c, 832 + Math.sin(t * 0.3) * 18, 199, t);
-    person(c, 848, 351, t, "#7ca28a");
-    ellipse(c, 848, 328, 8, 7, "#8bac86", ink);
-    ellipse(c, 845, 328, 2, 2, ink);
-    ellipse(c, 851, 328, 2, 2, ink);
+    const alienAt = w.anchors?.alien?.at(-1) || { x: 848, y: 351 };
+    ufo(c, alienAt.x + Math.sin(t * 0.3) * 18, alienAt.y - 152, t);
+    person(c, alienAt.x, alienAt.y, t, "#7ca28a");
+    ellipse(c, alienAt.x, alienAt.y - 23, 8, 7, "#8bac86", ink);
+    ellipse(c, alienAt.x - 3, alienAt.y - 23, 2, 2, ink);
+    ellipse(c, alienAt.x + 3, alienAt.y - 23, 2, 2, ink);
   }
   if (fx.band) {
+    const bandAt = w.anchors?.band?.at(-1) || { x: 650, y: 452 };
     for (let i = 0; i < 5; i++)
       tool(
         c,
         "band",
-        590 + i * 28 + Math.sin(t * 0.5) * 17,
-        452 + (i % 2) * 7,
+        bandAt.x - 60 + i * 28 + Math.sin(t * 0.5) * 17,
+        bandAt.y + (i % 2) * 7,
         t + i,
         0.6,
       );
   }
   if (fx.fire) {
-    tool(c, "firefighter", 250, 300, t, 0.65);
+    const fireAt = w.anchors?.fire?.at(-1) || { x: 250, y: 300 };
+    tool(c, "firefighter", fireAt.x, fireAt.y, t, 0.65);
     if (w.flags.firePermit) {
       for (let i = 0; i < 3; i++) {
         path(
@@ -1505,6 +1513,12 @@ export function render(
         );
       }
     }
+  }
+  if (fx.bureaucracy) {
+    rect(c, 453, 292, 105, 26, "#ffe095", 2, ink);
+    text(c, fx.dinosaur ? "DINO ON PAYROLL" : "NEW RULES", 505, 308, 9, ink);
+    for (let i = 0; i < Math.min(4, fx.bureaucracy + 1); i++)
+      person(c, 558 + i * 12, 393 + (i % 2) * 5, t + i, "#7b6881", 0.45);
   }
   if (fx.moon || e.id === "moon") {
     const descending = e.id === "moon" && w.recent.at(-1) !== "moon";
@@ -1738,7 +1752,6 @@ export function render(
     ellipse(c, 692, 385, 6, 6, "#e4b5ba", ink);
   }
   if (activeIncident && e.id === "dino-house") {
-    dinosaur(c, 365 + Math.sin(t * 2) * 4, 336, t, 0.6);
     for (let i = 0; i < 5; i++)
       rect(c, 327 + i * 7, 297 + Math.sin(t * 8 + i) * 9, 4, 3, "#deaf69", 1);
   }
@@ -1842,19 +1855,14 @@ export function render(
 }
 function drawOperation(c: C, o: Operation, t: number) {
   const { target } = o;
-  ellipse(c, target.x, target.y, 48, 24, "#f8e6a54d", "#fff3c9");
-  c.save();
-  c.setLineDash([7, 5]);
-  ellipse(c, target.x, target.y, 53, 27, "#ffffff00", "#425b44");
-  c.restore();
-  text(
-    c,
-    o.kind === "magnet" ? "DEPOT" : "TARGET",
-    target.x,
-    target.y + 43,
-    10,
-    "#2d493b",
-  );
+  if (o.kind !== "magnet") {
+    ellipse(c, target.x, target.y, 48, 24, "#f8e6a54d", "#fff3c9");
+    c.save();
+    c.setLineDash([7, 5]);
+    ellipse(c, target.x, target.y, 53, 27, "#ffffff00", "#425b44");
+    c.restore();
+    text(c, "TARGET", target.x, target.y + 43, 10, "#2d493b");
+  }
   if (o.kind === "steer") {
     line(
       c,
@@ -1909,7 +1917,7 @@ function drawOperation(c: C, o: Operation, t: number) {
       c,
       [
         [o.aim.x, 150],
-        [o.aim.x + 35, o.target.y],
+        [o.aim.x + 35, o.aim.y],
       ],
       "#fff3c799",
       1,
@@ -1925,7 +1933,7 @@ function drawOperation(c: C, o: Operation, t: number) {
         3,
       );
       tool(c, "firefighter", o.shotX, o.shotY, t, 0.55);
-    } else ellipse(c, o.aim.x + 35, o.target.y, 13, 7, "#d78a5544", "#efda9e");
+    } else ellipse(c, o.aim.x + 35, o.aim.y, 13, 7, "#d78a5544", "#efda9e");
     text(c, "WIND →", o.aim.x + 75, 150, 9, "#647d66");
   }
   if (o.kind === "launch") {
@@ -1958,20 +1966,8 @@ function drawOperation(c: C, o: Operation, t: number) {
     text(c, "WIND → 65m", 110, 350, 12, "#526c51");
   }
   if (o.kind === "timing") {
-    rect(c, 220, 157, 560, 91, "#f4ebce", 6, ink);
-    text(c, "MINISTRY OF EXCESSIVE PRECISION", 500, 180, 10);
-    rect(c, 245, 197, 510, 24, "#d5ccac", 3);
-    rect(c, 245 + 510 * 0.58, 197, 510 * 0.2, 24, "#80a075", 1);
-    line(
-      c,
-      [
-        [245 + o.needle() * 5.1, 190],
-        [245 + o.needle() * 5.1, 229],
-      ],
-      "#bd513d",
-      5,
-    );
-    tool(c, o.tool, o.target.x, o.target.y, t, 0.8);
+    ellipse(c, o.aim.x, o.aim.y, 20, 12, "#d95c5555", "#7c3e45");
+    tool(c, o.tool, o.aim.x, o.aim.y - 20, t, 0.8);
   }
   if (o.time - o.lastStamp < 0.7) {
     rect(

@@ -319,7 +319,7 @@ export const events: Emergency[] = [
   },
   {
     id: "alien-parking",
-    tier: 0,
+    tier: 1,
     caller: "VISITORS · DEFINITELY LOCAL",
     title: "Where do you validate parking?",
     line: "“We crossed six galaxies. Your meter takes neither credits nor the concept of time.”",
@@ -1180,20 +1180,21 @@ export const events: Emergency[] = [
 ];
 export function pick(w: World): Emergency {
   if (w.count === 0) return events[0];
+  if (w.count === 25) return events.find((e) => e.id === "moon")!;
+  const tier = w.count >= 25 ? 3 : w.count >= 14 ? 2 : w.count >= 6 ? 1 : 0;
   const chained = events.find(
     (e) =>
       e.id === w.next &&
+      (e.tier < 2 || e.tier <= tier) &&
       (!e.requires || w.effects[e.requires] > 0) &&
       !w.recent.slice(-2).includes(e.id),
   );
-  if (w.count === 25) return events.find((e) => e.id === "moon")!;
   if (
     chained &&
     !w.recent.includes(chained.id) &&
     (!w.history.some((h) => h.event === chained.id) || w.count % 4 !== 0)
   )
     return chained;
-  const tier = w.count >= 25 ? 3 : w.count >= 14 ? 2 : w.count >= 6 ? 1 : 0;
   let pool = events.filter(
     (e) =>
       e.id !== "cat" &&

@@ -146,10 +146,8 @@ for (let i = 0; i < 30; i++) {
     r = e.responses[i % 3];
   seen.add(r.mechanic);
   await click(r.label);
-  assert.equal(
-    document.querySelector("canvas")?.getAttribute("role"),
-    "application",
-  );
+  const direct = r.mechanic === "timing" && r.tool === "stamp";
+  if (!direct) assert.equal(document.querySelector("canvas")?.getAttribute("role"), "application");
   if (i === 0) {
     const before = state();
     assert.equal(before.phase, "call");
@@ -162,41 +160,22 @@ for (let i = 0; i < 30; i++) {
     assert.match(document.body.textContent!, /My cat is stuck/);
     await click(r.label);
   }
-  if (r.mechanic === "magnet") {
-    for (const [x, y] of [
-      [270, 460],
-      [510, 445],
-      [750, 500],
-    ]) {
-      await pointer(x, y);
-      await step(3);
+  if (!direct) {
+    if (r.mechanic === "magnet") {
+      await pointer(270, 460);
+      await pointer(510, 445, "pointermove");
+      await pointer(750, 500, "pointermove");
+      await pointer(750, 500, "pointerup");
+    } else if (r.mechanic === "steer") {
+      await pointer(90, 490);
+      await pointer(...e.location, "pointermove");
+      await pointer(...e.location, "pointerup");
+    } else {
+      const x = e.location[0] - (r.mechanic === "launch" ? 65 : r.mechanic === "rescue" ? 35 : 0);
+      await pointer(x, e.location[1]);
+      await pointer(x, e.location[1], "pointerup");
     }
-    await pointer(820, 525, "pointermove");
-    await step(5);
-  } else if (r.mechanic === "steer") {
-    await pointer(...e.location);
-    await step(14.5);
-  } else if (r.mechanic === "timing") {
-    for (let n = 0; n < 3; n++) {
-      await click("AUTHORIZE");
-      await step(1);
-    }
-    await step(12);
-  } else {
-    const n = r.mechanic === "launch" ? 2 : 3;
-    for (let j = 0; j < n; j++) {
-      await pointer(
-        e.location[0] - (r.mechanic === "launch" ? 65 : 35),
-        e.location[1],
-      );
-      await pointer(
-        e.location[0] - (r.mechanic === "launch" ? 65 : 35),
-        e.location[1],
-        "pointerup",
-      );
-      await step(1.5);
-    }
-    await step(11);
+    await step(2.3);
   }
   assert.equal(state().phase, "result", `no result for ${i}:${r.mechanic}`);
   assert.equal(state().world.count, i + 1);
@@ -231,7 +210,8 @@ Object.defineProperty(win, "innerWidth", { value: 390, configurable: true });
 await mount();
 await click("Deploy a dinosaur");
 await pointer(250, 340);
-await step(14);
+await pointer(250, 340, "pointerup");
+await step(1);
 assert.equal(state().world.count, 1);
 assert.equal(state().world.effects.dinosaur, 1);
 await click("New game");
@@ -254,10 +234,13 @@ for (const [key, seconds] of [
     ),
   );
 }
-await step(9);
+await act(async () =>
+  keyboardCanvas.dispatchEvent(new win.KeyboardEvent("keydown", { key: " ", bubbles: true })),
+);
+await step(1);
 assert.equal(state().world.count, 1);
 assert.equal(state().world.effects.dinosaur, 1);
 await act(async () => root.unmount());
 console.log(
-  "PASS: actual React UI mounted; 30 pointer-driven operations, all five mechanics, promotion screens, safe challenge refresh, mute, case history, reset cancellation/reset, and narrow-canvas pointer coordinates. DOM simulation only; no browser layout/audio claim.",
+  "PASS: actual React UI mounted; 30 direct responses and gestures, all five mechanics, promotion screens, safe challenge refresh, mute, case history, reset, narrow-canvas pointer coordinates and keyboard release. DOM simulation only; no browser layout/audio claim.",
 );

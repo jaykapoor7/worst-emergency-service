@@ -52,6 +52,7 @@ export type World = {
   effects: Record<Effect, number>;
   flags: Record<SceneFlag, boolean>;
   evidence: Evidence[];
+  anchors?: Partial<Record<Effect, { x: number; y: number }[]>>;
   history: { event: string; response: string; score: number }[];
   recent: string[];
   next?: string;
@@ -122,6 +123,7 @@ export function fresh(seed = Date.now() % 100000): World {
       firePermit: false,
     },
     evidence: [],
+    anchors: {},
     history: [],
     recent: [],
     promotions: [],
@@ -136,8 +138,9 @@ export function resolve(
   r: Response,
   o: Outcome,
 ): World {
+  const score = clamp(Math.round(o.score), 0, 100);
   const flags = { ...w.flags };
-  if (e.id === "cat" && r.mechanic !== "rescue") flags.treeRemoved = true;
+  if (e.id === "cat" && r.mechanic !== "rescue" && score >= 55) flags.treeRemoved = true;
   if (e.id === "dino-house") flags.houseChewed = true;
   if (e.id === "roof" && r.mechanic === "magnet") flags.bakeryOpenAir = true;
   if (e.id === "mayor" && r.mechanic === "timing") flags.mayorCabinet = true;
@@ -147,8 +150,7 @@ export function resolve(
   if (e.id === "fire-permit") flags.firePermit = true;
   const effects = { ...w.effects };
   r.effects.forEach((k) => (effects[k] = Math.min(5, effects[k] + 1)));
-  const score = clamp(Math.round(o.score), 0, 100),
-    count = w.count + 1;
+  const count = w.count + 1;
   const evidence = [
     ...w.evidence,
     ...r.effects.map((kind, i) => ({
@@ -159,18 +161,26 @@ export function resolve(
       id: count * 10 + i,
     })),
   ].slice(-32);
+  const anchors = { ...w.anchors };
+  r.effects.forEach((kind, i) => {
+    anchors[kind] = [
+      ...(anchors[kind] || []),
+      { x: clamp(o.x + i * 29, 60, 940), y: clamp(o.y + i * 8, 230, 580) },
+    ].slice(-3);
+  });
   return {
     ...w,
     count,
     effects,
     flags,
     evidence,
+    anchors,
     history: [...w.history, { event: e.id, response: r.label, score }].slice(
       -100,
     ),
     recent: [...w.recent, e.id].slice(-7),
     next: r.next,
-    catSaved: w.catSaved || e.id === "cat",
+    catSaved: w.catSaved || (e.id === "cat" && score >= 55),
     damage: clamp(
       w.damage +
         (score < 40 ? 1 : 0) +
@@ -193,6 +203,13 @@ export function validSession(raw: unknown): raw is Session {
     Number.isInteger(s.world.count) &&
     Array.isArray(s.world.evidence) &&
     s.world.evidence.length <= 32 &&
+    (!s.world.anchors ||
+      Object.entries(s.world.anchors).every(([kind, points]) =>
+        kind in fresh(1).effects &&
+        Array.isArray(points) &&
+        points.length <= 3 &&
+        points.every((p) => Number.isFinite(p?.x) && Number.isFinite(p?.y))
+      )) &&
     s.world.evidence.every(
       (a) =>
         a &&

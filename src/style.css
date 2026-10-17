@@ -2197,3 +2197,150 @@ h1 em {
     animation: none;
   }
 }
+
+/* The aftermath is pinned to the place the player actually touched. */
+.impact-marker {
+  position: absolute;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  animation: impact-arrives 0.45s ease-out both;
+}
+.world.revealing canvas {
+  animation: camera-reveal 1.15s ease-out both;
+}
+@keyframes camera-reveal {
+  0% { transform: scale(1.55); }
+  100% { transform: scale(1); }
+}
+.impact-marker::before {
+  content: "";
+  position: absolute;
+  width: 70px;
+  height: 42px;
+  left: -35px;
+  top: -21px;
+  border: 3px solid #fff6d5;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #29283d99, 0 0 0 11px #ffe08266;
+  animation: impact-pulse 1.8s ease-out infinite;
+}
+.impact-marker span {
+  position: absolute;
+  bottom: 27px;
+  left: 0;
+  transform: translateX(-50%) rotate(-3deg);
+  width: max-content;
+  max-width: 190px;
+  padding: 7px 9px;
+  border: 2px solid #29283d;
+  border-radius: 3px;
+  background: #ffe08a;
+  color: #29283d;
+  box-shadow: 2px 3px 0 #29283d;
+  font: 700 10px/1.15 "DM Sans", sans-serif;
+  text-align: center;
+}
+@keyframes impact-arrives {
+  from { opacity: 0; transform: scale(1.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes impact-pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0.15; }
+}
+.call-shortcut { display: none; }
+.aftermath {
+  margin: 20px 0 24px;
+  border: 2px solid #29283d;
+  border-radius: 5px;
+  background: #fff2c8;
+  padding: 15px 17px;
+  box-shadow: 3px 4px 0 #d9cfad;
+}
+.impact-window {
+  position: relative;
+  height: 165px;
+  overflow: hidden;
+  margin: 0 0 19px;
+  border: 3px solid #29283d;
+  border-radius: 7px;
+  background: #a4d77b;
+  box-shadow: 3px 4px 0 #d9cfad;
+}
+.impact-window canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.impact-window > span,
+.impact-window > b {
+  position: absolute;
+  background: #29283d;
+  color: #fff7dd;
+  font: 8px "DM Mono", monospace;
+  letter-spacing: 0.3px;
+  padding: 6px 7px;
+}
+.impact-window > span { top: 7px; left: 7px; }
+.impact-window > b {
+  right: 8px;
+  bottom: 8px;
+  transform: rotate(-4deg);
+  background: #f8df8c;
+  color: #29283d;
+  border: 2px solid #29283d;
+  font-weight: 700;
+}
+.aftermath > span {
+  font: 8px "DM Mono", monospace;
+  letter-spacing: 0.8px;
+  color: #78604b;
+}
+.aftermath ul {
+  list-style: none;
+  padding: 0;
+  margin: 9px 0 13px;
+}
+.aftermath li {
+  font: 700 15px/1.25 "DM Sans", sans-serif;
+  color: #29283d;
+  margin: 5px 0;
+}
+.aftermath li::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 8px 2px 0;
+  border-radius: 50%;
+  background: #c95248;
+}
+.aftermath small {
+  display: block;
+  border-top: 1px dashed #bea97f;
+  padding-top: 10px;
+  font: 8px/1.4 "DM Mono", monospace;
+  color: #78604b;
+}
+@media (max-width: 760px) {
+  .world-ticker { gap: 8px; }
+  .world-ticker p { flex: 1; }
+  .call-shortcut {
+    display: block;
+    flex: 0 0 auto;
+    border: 2px solid #29283d;
+    border-radius: 4px;
+    background: #fff9ec;
+    padding: 9px 7px;
+    color: #29283d;
+    font: 700 8px "DM Sans", sans-serif;
+  }
+  .impact-marker span { max-width: 130px; font-size: 8px; top: 29px; bottom: auto; }
+  .impact-marker.low span { top: auto; bottom: 27px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .impact-marker, .impact-marker::before, .world.revealing canvas { animation: none; }
+}

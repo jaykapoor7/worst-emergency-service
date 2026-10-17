@@ -7,7 +7,7 @@ A standalone, illustrated browser game by Jay Kapoor. A cat needs rescuing. Depl
 Choose one of three responses to a call, operate the response directly in the town, and watch its consequences stick around. Failure advances the story too. Your decisions generate follow-up calls, grow the town's peculiar local traditions, and eventually get you elected President. The phone keeps ringing after that.
 
 - 34 authored emergencies and 102 response branches.
-- Five input-driven operations: steering, helicopter rescue, magnetic collection, three-stamp timing, and wind-affected delivery launches.
+- Five direct response interactions: drag a vehicle or creature, aim one rescue line, sweep cars with a magnet, place a demolition charge, or choose a landing point. Administrative choices take effect immediately. No operation uses a countdown or repeated taps.
 - Original procedural Canvas illustrations, moving citizens and traffic, and persistent visual combinations. A ringing Bakelite phone, animated paper dispatch slips, illustrated response keys, impact stamps and an unfurling presidential banner form the interface.
 - Local saves, case history, mute, confirmation before New Game, keyboard controls, touch controls, and reduced ambient motion.
 - Original synthesized ring, siren, stamp, crash, success, and promotion sounds. Audio starts after interaction.
@@ -45,12 +45,13 @@ npm run portable
 | `src/operation.ts` | Input, simulated movement, collisions, rescue drops, trajectories, quality     |
 | `src/render.ts`    | Original town art, ambient animation, visible effects and operation rendering  |
 | `src/World.tsx`    | Canvas lifecycle, responsive resolution, pointer/keyboard input, frame updates |
+| `src/ImpactLens.tsx` | Live close-up of the exact location changed by the last response             |
 | `src/App.tsx`      | Dispatch UI, persistence, reports, case history, mute and New Game             |
 | `src/audio.ts`     | Gesture-gated procedural audio                                                 |
 
 React renders the interface; Canvas runs the simulation in one animation loop. UI operation readouts are throttled to ten updates per second. Simulation pauses in hidden tabs. The world freezes for promotions while confetti continues. Reduced motion stops ambient movement while preserving necessary challenge feedback.
 
-Entity counts and retained data are bounded: 32 evidence marks, 100 decisions, seven recent event IDs, up to three visible dinosaurs and ten pigeons. Conditions combine: flooded dinosaurs swim, alien-era dinosaurs acquire diplomatic status, and the pigeon mayor occupies a magnetized vehicle pile.
+Entity counts and retained data are bounded: 32 evidence marks, three permanent anchors per effect, 100 decisions, seven recent event IDs, up to three visible dinosaurs and ten pigeons. Response coordinates are saved as world anchors: a dinosaur, magnet pile, band, firefighter, or alien stays where the player placed it. Conditions combine: flooded dinosaurs swim, alien-era dinosaurs acquire diplomatic status, and the pigeon mayor occupies a magnetized vehicle pile.
 
 Saves contain the last safe session state. An operation is transient: refreshing during it replays the same unanswered call. Completed cases and promotion screens are saved, so refreshing cannot apply a decision twice or skip a promotion. Corrupt saves fall back to a fresh town.
 
@@ -60,7 +61,7 @@ Add an `Emergency` to `events` with a unique ID, caller, short situation, town l
 
 ## Add a mechanic
 
-Extend `Mechanic`, add its input/step/scoring logic to `Operation`, provide instructions in `HELP`, and render its operation in `drawOperation`. Return an `Outcome`; persistent consequences still go through the same `resolve` function. Test actual input quality and fail-forward resolution, not only rendering.
+Extend `Mechanic`, add its input/scoring logic to `Operation`, provide instructions in `HELP`, and render its response in `drawOperation`. Each interaction should change the outcome in one clear gesture. Return an `Outcome` with the player's coordinates; persistent consequences still go through `resolve`. Test both accurate and missed actions.
 
 ## Deployment
 
@@ -75,7 +76,7 @@ Import this repository into its own Vercel project. Once the deployment is READY
 
 ## Verification
 
-See `VERIFICATION.md` for the precise checks completed and remaining limitations. A successful compile or engine test is not a browser end-to-end test.
+See `VERIFICATION.md` for the precise checks completed and remaining limitations.
 
 ## Assets
 

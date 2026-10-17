@@ -14,6 +14,21 @@ import {
 import { complete, advance, acknowledgePromotion } from "./session";
 import type { Hud } from "./World";
 import { play, setMute, unlock } from "./audio";
+import ImpactLens from "./ImpactLens";
+const changeLabels: Record<string, string> = {
+  dinosaur: "A dinosaur lives here now",
+  flood: "The water stayed",
+  pigeons: "Pigeons have claimed this place",
+  alien: "Visitors have landed",
+  fire: "The fire brigade is still here",
+  band: "The band refuses to leave",
+  magnet: "The cars are still stuck together",
+  moon: "The moon is now a local problem",
+  wind: "The weather took a turn",
+  ducks: "Ducks have moved in",
+  bureaucracy: "A new law is in effect",
+  crater: "A hole in the town remains",
+};
 const blank = (): Session => ({
   world: fresh(),
   eventId: "cat",
@@ -51,6 +66,8 @@ export default function App() {
   const nextRank = titles.find((t) => t.at > world.count);
   const isPresident = world.count >= 25;
   const selectedResponse = selected === null ? null : event.responses[selected];
+  const caseChanges = world.evidence.filter((mark) => Math.floor(mark.id / 10) === world.count);
+  const latestChange = caseChanges[0];
   const primaryRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     try {
@@ -81,10 +98,15 @@ export default function App() {
   );
   const deploy = (i: number) => {
     unlock();
-    play("siren");
     transitioning.current = false;
-    setSelected(i);
     const r = event.responses[i];
+    if (r.mechanic === "timing" && r.tool === "stamp") {
+      play("stamp");
+      setSession((s) => complete(s, i, { score: 100, x: event.location[0], y: event.location[1], collisions: 0 }));
+      return;
+    }
+    play("siren");
+    setSelected(i);
     const target: [number, number] =
       r.mechanic === "magnet" ? [820, 525] : event.location;
     setHud({ time: 0, started: false, shots: 0, pickups: 0, goal: false });
@@ -161,18 +183,11 @@ export default function App() {
       previous?.focus();
     };
   }, [reset, history]);
-  const act = () => {
-    unlock();
-    play("click");
-    operation?.act();
-  };
   return (
     <div className="app">
       <header>
-        <a
+        <div
           className="wordmark"
-          href="/"
-          onClick={(e) => e.preventDefault()}
           aria-label="The World's Worst Emergency Service"
         >
           <Seal />
@@ -184,7 +199,7 @@ export default function App() {
               EMERGENCY SERVICE
             </strong>
           </span>
-        </a>
+        </div>
         <div className="header-tools">
           <span className="open">
             <i />
@@ -249,7 +264,7 @@ export default function App() {
         </div>
         <div className="game">
           <section
-            className={`world ${operation ? "operating" : ""}`}
+            className={`world ${operation ? "operating" : ""} ${phase === "result" ? "revealing" : ""}`}
             aria-label="The town"
           >
             <div className="camera-strip">
@@ -277,54 +292,42 @@ export default function App() {
                 onHud={setHud}
                 onSecret={gossip}
                 celebrate={phase === "promotion"}
+                impact={phase === "result" && latestChange ? latestChange : undefined}
               />
               {operation && (
                 <div className="field-help">
-                  {
-                    {
-                      steer:
-                        "Hold on the town to guide the response into the striped target.",
-                      rescue:
-                        "Move to aim. Release to lower the rescue line. Watch the wind.",
-                      magnet:
-                        "Hold and drag. Collect three cars, then bring them to the depot.",
-                      timing:
-                        "Stamp when the moving needle enters the green band.",
-                      launch:
-                        "Choose a landing point. Release to launch. Account for the wind.",
-                    }[operation.kind]
-                  }
+                  {operation.kind === "steer"
+                    ? "DRAG TO THE TARGET · RELEASE TO COMMIT"
+                    : operation.kind === "magnet"
+                      ? "SWEEP THROUGH THE CARS · RELEASE TO COMMIT"
+                      : operation.kind === "timing"
+                        ? "TAP TO PLACE THE CHARGE"
+                        : "TAP A SPOT IN THE TOWN"}
                 </div>
-              )}
-              {operation?.kind === "timing" && (
-                <button
-                  className="field-authorize"
-                  disabled={hud.shots >= 3 || operation.finished}
-                  onClick={act}
-                >
-                  AUTHORIZE <span>{Math.min(3, hud.shots + 1)} / 3</span>
-                </button>
               )}
               {operation && (
                 <div className="operation-strip">
                   <span>
                     {hud.started
-                      ? `${Math.max(0, 13 - Math.floor(hud.time))}s REMAINING`
-                      : "TOUCH THE TOWN TO BEGIN"}
+                      ? "YOUR ACTION CHANGES THIS SPOT"
+                      : "THE TOWN IS YOUR CONTROL"}
                   </span>
                   <span>
                     {operation.kind === "magnet"
                       ? `${hud.pickups}/3 CARS COLLECTED`
-                      : operation.kind === "timing"
-                        ? `${hud.shots}/3 AUTHORIZATIONS`
-                        : operation.kind === "rescue"
-                          ? `${hud.shots}/3 RESCUES`
-                          : operation.kind === "launch"
-                            ? `${hud.shots}/2 DELIVERIES`
-                            : hud.goal
-                              ? "TARGET REACHED · HOLD POSITION"
-                              : "FOLLOW THE STRIPED TARGET"}
+                      : operation.kind === "steer"
+                        ? "DRAG · RELEASE"
+                        : "TAP ONCE"}
                   </span>
+                </div>
+              )}
+              {phase === "result" && latestChange && (
+                <div
+                  className={`impact-marker ${latestChange.y > 420 ? "low" : ""}`}
+                  style={{ left: `${latestChange.x / 10}%`, top: `${latestChange.y / 6.4}%` }}
+                  role="status"
+                >
+                  <span>{changeLabels[latestChange.kind]}</span>
                 </div>
               )}
               {secret && (
@@ -356,7 +359,12 @@ export default function App() {
             </div>
             <div className="world-ticker">
               <span className="ticker-label">LOCAL UPDATE</span>
-              <p>{callback(world)}</p>
+              <p>{phase === "result" && latestChange ? changeLabels[latestChange.kind] + ". " + callback(world) : callback(world)}</p>
+              {phase === "call" && !operation && (
+                <button className="call-shortcut" onClick={() => document.querySelector(".dispatch")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                  ANSWER CALL ↓
+                </button>
+              )}
             </div>
             <div className="town-caption">
               <span>
@@ -439,40 +447,19 @@ export default function App() {
                   <span>YOU AUTHORIZED</span>
                   <strong>{selectedResponse.label}</strong>
                 </div>
-                <div className="operation-progress">
-                  <i style={{ width: `${(hud.time / 13) * 100}%` }} />
-                </div>
                 <p className="operation-readout">
                   {hud.started
-                    ? "THE OPERATION IS NOW YOUR RESPONSIBILITY."
-                    : "THE TOWN IS INTERACTIVE. YOUR MOUSE OR FINGER IS THE RESPONSE."}
+                    ? "The result will happen where you act."
+                    : "Touch the town to carry this out."}
                 </p>
-                <button
-                  className="primary"
-                  disabled={
-                    operation.finished ||
-                    (operation.kind === "launch" ? 2 : 3) <= hud.shots
-                  }
-                  onClick={act}
-                >
-                  {HELP[operation.kind].action.toUpperCase()} <span>↵</span>
-                </button>
                 <p className="keyboard">{HELP[operation.kind].keyboard}</p>
-                <p className="fineprint">
-                  FAILURE STILL ADVANCES THE STORY.
-                  <br />
-                  THE GOVERNMENT BELIEVES IN YOU.
-                </p>
               </div>
             )}
             {phase === "result" && report && (
               <div className="result-content">
-                <div className="stamp">
-                  <span className="stamp-check">✓</span>
-                  SUCCESSFULLY
-                  <br />
-                  DEALT WITH*
-                </div>
+                {latestChange && (
+                  <ImpactLens x={latestChange.x} y={latestChange.y} label={changeLabels[latestChange.kind]} />
+                )}
                 <span className="caller">OFFICIAL AFTER-ACTION REPORT</span>
                 <h2>
                   {report.score > 65
@@ -480,12 +467,14 @@ export default function App() {
                     : "You did something. Well done."}
                 </h2>
                 <p className="result-story">{report.text}</p>
-                <div className="assessment">
-                  <span>
-                    OPERATIONAL ACCURACY{" "}
-                    <strong>{Math.round(report.score)}%</strong>
-                  </span>
-                  <p>{report.assessment}</p>
+                <div className="aftermath">
+                  <span>PERMANENTLY ADDED TO THE TOWN</span>
+                  <ul>
+                    {caseChanges.map((change) => (
+                      <li key={change.id}>{changeLabels[change.kind]}</li>
+                    ))}
+                  </ul>
+                  <small>PLACEMENT {Math.round(report.score)}% · {report.assessment}</small>
                 </div>
                 <button className="primary" ref={primaryRef} onClick={next}>
                   ANSWER NEXT CALL <span>→</span>
