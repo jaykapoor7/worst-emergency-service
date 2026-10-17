@@ -15,7 +15,7 @@ for (const match of [
       `url("data:font/woff2;base64,${bytes.toString("base64")}")`,
     );
   }
-  html = html.replace(match[0], `<style>${css}</style>`);
+  html = html.replace(match[0], () => `<style>${css}</style>`);
 }
 for (const match of [
   ...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*><\/script>/g),
@@ -23,7 +23,8 @@ for (const match of [
   const js = await readFile(path.join(dist, match[1]), "utf8");
   html = html.replace(
     match[0],
-    `<script type="module">${js.replaceAll("</script", "<\\/script")}</script>`,
+    () =>
+      `<script type="module">${js.replaceAll("</script", "<\\/script")}</script>`,
   );
 }
 const icon = await readFile(path.join(dist, "favicon.svg"));

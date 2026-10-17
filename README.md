@@ -6,9 +6,9 @@ A standalone, illustrated browser game by Jay Kapoor. A cat needs rescuing. Depl
 
 Choose one of three responses to a call, operate the response directly in the town, and watch its consequences stick around. Failure advances the story too. Your decisions generate follow-up calls, grow the town's peculiar local traditions, and eventually get you elected President. The phone keeps ringing after that.
 
-- 33 authored emergencies and 99 response branches.
+- 34 authored emergencies and 102 response branches.
 - Five input-driven operations: steering, helicopter rescue, magnetic collection, three-stamp timing, and wind-affected delivery launches.
-- Original procedural Canvas illustrations, moving citizens and traffic, and persistent visual combinations.
+- Original procedural Canvas illustrations, moving citizens and traffic, and persistent visual combinations. A ringing Bakelite phone, animated paper dispatch slips, illustrated response keys, impact stamps and an unfurling presidential banner form the interface.
 - Local saves, case history, mute, confirmation before New Game, keyboard controls, touch controls, and reduced ambient motion.
 - Original synthesized ring, siren, stamp, crash, success, and promotion sounds. Audio starts after interaction.
 - No accounts, backend, AI API, paid service, tracking, or external runtime network requests.
@@ -28,6 +28,7 @@ Open the local address shown by Vite.
 npm run check
 npm run lint
 npm test
+npm run test:ui
 npm run build
 npm run portable
 ```
@@ -55,7 +56,7 @@ Saves contain the last safe session state. An operation is transient: refreshing
 
 ## Add an emergency
 
-Add an `Emergency` to `events` with a unique ID, caller, short situation, town location, tier, and three responses. Each response specifies a mechanic, illustrated response tool, written consequence, world effects, and optional causal `next` ID. The automated suite validates all follow-up references. Optional `requires` restricts a call to a relevant world effect.
+Add an `Emergency` to `events` with a unique ID, caller, short situation, town location, tier, and three responses. Each response specifies a mechanic, illustrated response tool, written consequence, world effects, and optional causal `next` ID. The automated suite validates all follow-up references. Optional `requires` restricts a call to a relevant world effect. Durable scene flags separately retain architectural changes and running visual jokes even after the rolling case log is capped.
 
 ## Add a mechanic
 

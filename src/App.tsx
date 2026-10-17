@@ -4,6 +4,7 @@ import { fresh, rank, SAVE_KEY, titles, validSession } from "./model";
 import type { Outcome, Session } from "./model";
 import { HELP, Operation } from "./operation";
 import World from "./World";
+import { Phone, Seal, Doodle, RankBadge } from "./Illustrations";
 import { complete, advance, acknowledgePromotion } from "./session";
 import type { Hud } from "./World";
 import { play, setMute, unlock } from "./audio";
@@ -21,29 +22,6 @@ function restore(): Session {
   } catch {
     return blank();
   }
-}
-function Phone({ ring = false }: { ring?: boolean }) {
-  return (
-    <svg
-      className={ring ? "phone ringing" : "phone"}
-      width="26"
-      height="26"
-      viewBox="0 0 28 28"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M5 4 9 3l4 6-3 3c2 3 3 4 6 5l3-3 6 4-1 4c-1 5-9 1-14-4C4 12 1 5 5 4Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      />
-      <path
-        d="M17 4c4 0 7 3 7 7M17 8c2 0 3 1 3 3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
 }
 export default function App() {
   const [session, setSession] = useState<Session>(restore);
@@ -191,7 +169,7 @@ export default function App() {
           onClick={(e) => e.preventDefault()}
           aria-label="The World's Worst Emergency Service"
         >
-          <span className="seal">✳</span>
+          <Seal />
           <span>
             <small>DEPARTMENT OF UNEXPECTED OUTCOMES</small>
             <strong>
@@ -249,6 +227,7 @@ export default function App() {
             </h1>
           </div>
           <div className="career">
+            <RankBadge />
             <span>YOUR CURRENT QUALIFICATIONS</span>
             <strong>{currentRank.title}</strong>
             {nextRank && (
@@ -293,6 +272,33 @@ export default function App() {
                 onSecret={gossip}
                 celebrate={phase === "promotion"}
               />
+              {operation && (
+                <div className="field-help">
+                  {
+                    {
+                      steer:
+                        "Hold on the town to guide the response into the striped target.",
+                      rescue:
+                        "Move to aim. Release to lower the rescue line. Watch the wind.",
+                      magnet:
+                        "Hold and drag. Collect three cars, then bring them to the depot.",
+                      timing:
+                        "Stamp when the moving needle enters the green band.",
+                      launch:
+                        "Choose a landing point. Release to launch. Account for the wind.",
+                    }[operation.kind]
+                  }
+                </div>
+              )}
+              {operation?.kind === "timing" && (
+                <button
+                  className="field-authorize"
+                  disabled={hud.shots >= 3 || operation.finished}
+                  onClick={act}
+                >
+                  AUTHORIZE <span>{Math.min(3, hud.shots + 1)} / 3</span>
+                </button>
+              )}
               {operation && (
                 <div className="operation-strip">
                   <span>
@@ -395,6 +401,7 @@ export default function App() {
                   {event.responses.map((r, i) => (
                     <button key={r.label} onClick={() => deploy(i)}>
                       <span className="response-number">0{i + 1}</span>
+                      <Doodle tool={r.tool} />
                       <span>{r.label}</span>
                       <b>↗</b>
                     </button>
@@ -449,6 +456,7 @@ export default function App() {
             {phase === "result" && report && (
               <div className="result-content">
                 <div className="stamp">
+                  <span className="stamp-check">✓</span>
                   SUCCESSFULLY
                   <br />
                   DEALT WITH*
@@ -477,7 +485,9 @@ export default function App() {
             )}
             {phase === "promotion" && (
               <div className="promotion-content">
-                <span className="laurel">✷ ✳ ✷</span>
+                <span className="laurel">
+                  <RankBadge />
+                </span>
                 <span className="caller">FORM 23-B · UPWARD FAILURE</span>
                 <h2>
                   {isPresident

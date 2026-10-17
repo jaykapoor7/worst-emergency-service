@@ -20,6 +20,14 @@ export type Response = {
   effects: Effect[];
   next?: string;
 };
+export type SceneFlag =
+  | "treeRemoved"
+  | "houseChewed"
+  | "bakeryOpenAir"
+  | "mayorCabinet"
+  | "ladderMoon"
+  | "busFlying"
+  | "firePermit";
 export type Emergency = {
   id: string;
   caller: string;
@@ -42,6 +50,7 @@ export type World = {
   count: number;
   seed: number;
   effects: Record<Effect, number>;
+  flags: Record<SceneFlag, boolean>;
   evidence: Evidence[];
   history: { event: string; response: string; score: number }[];
   recent: string[];
@@ -103,6 +112,15 @@ export function fresh(seed = Date.now() % 100000): World {
       bureaucracy: 0,
       crater: 0,
     },
+    flags: {
+      treeRemoved: false,
+      houseChewed: false,
+      bakeryOpenAir: false,
+      mayorCabinet: false,
+      ladderMoon: false,
+      busFlying: false,
+      firePermit: false,
+    },
     evidence: [],
     history: [],
     recent: [],
@@ -118,6 +136,15 @@ export function resolve(
   r: Response,
   o: Outcome,
 ): World {
+  const flags = { ...w.flags };
+  if (e.id === "cat" && r.mechanic !== "rescue") flags.treeRemoved = true;
+  if (e.id === "dino-house") flags.houseChewed = true;
+  if (e.id === "roof" && r.mechanic === "magnet") flags.bakeryOpenAir = true;
+  if (e.id === "mayor" && r.mechanic === "timing") flags.mayorCabinet = true;
+  if (e.id === "ladder" && r.mechanic === "launch") flags.ladderMoon = true;
+  if (e.id === "bus" || (e.id === "helipad" && r.mechanic === "rescue"))
+    flags.busFlying = true;
+  if (e.id === "fire-permit") flags.firePermit = true;
   const effects = { ...w.effects };
   r.effects.forEach((k) => (effects[k] = Math.min(5, effects[k] + 1)));
   const score = clamp(Math.round(o.score), 0, 100),
@@ -136,6 +163,7 @@ export function resolve(
     ...w,
     count,
     effects,
+    flags,
     evidence,
     history: [...w.history, { event: e.id, response: r.label, score }].slice(
       -100,
@@ -165,10 +193,33 @@ export function validSession(raw: unknown): raw is Session {
     Number.isInteger(s.world.count) &&
     Array.isArray(s.world.evidence) &&
     s.world.evidence.length <= 32 &&
+    s.world.evidence.every(
+      (a) =>
+        a &&
+        Number.isFinite(a.x) &&
+        Number.isFinite(a.y) &&
+        Number.isFinite(a.quality) &&
+        a.kind in fresh(1).effects,
+    ) &&
+    Number.isFinite(s.world.seed) &&
+    Number.isFinite(s.world.damage) &&
+    typeof s.world.catSaved === "boolean" &&
+    typeof s.world.muted === "boolean" &&
+    Object.keys(fresh(1).flags).every(
+      (k) => typeof s.world.flags?.[k as SceneFlag] === "boolean",
+    ) &&
     Array.isArray(s.world.history) &&
     s.world.history.length <= 100 &&
+    s.world.history.every(
+      (h) =>
+        h &&
+        typeof h.event === "string" &&
+        typeof h.response === "string" &&
+        Number.isFinite(h.score),
+    ) &&
     Array.isArray(s.world.recent) &&
     Array.isArray(s.world.promotions) &&
+    s.world.promotions.every(Number.isFinite) &&
     typeof s.eventId === "string" &&
     ["call", "result", "promotion"].includes(s.phase) &&
     Object.keys(fresh(1).effects).every((k) =>

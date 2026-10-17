@@ -4,10 +4,11 @@
 
 - TypeScript strict check and production bundle.
 - ESLint source check.
-- Twelve automated tests covering 33 event definitions, all causal references, opening branches, steering, fail-forward behavior, magnetic collection, rescue accuracy, wind-affected launches, timing inputs, and save validation.
+- Twelve automated tests covering 34 event definitions, all causal references, opening branches, steering, fail-forward behavior, magnetic collection, rescue accuracy, wind-affected launches, timing inputs, and save validation.
 - Thirty uninterrupted simulated operations through the actual session/operation engine: each result, promotion, acknowledgement and next-call transition. Six promotions awarded; the first presidential call is the moon; gameplay continues beyond that call.
 - Two-hundred-emergency progression simulation with variation and bounded retained state.
 - Direct renderer output inspected as PNGs for the peaceful and chaotic town. This is inspection of the drawing code's output, not a browser screenshot.
+- Actual React component integration in a simulated DOM: 30 calls driven through pointer events and dispatch buttons, all five operations, promotion dialogs, challenge refresh recovery, persistent mute, case history, cancelling/confirming New Game, narrow-canvas pointer mapping and keyboard steering. The Canvas drawing API is mocked in this test; it is not a browser layout, audio or physical device test. Run `npm run test:ui`.
 - Input guard: the start button alone cannot complete steering or magnetic collection successfully.
 
 ## Remaining live verification

@@ -1059,17 +1059,46 @@ export function render(
   tree(c, 95, 560, 0.8);
   tree(c, 820, 578, 0.8);
   building(c, 140, 328, 86, 68, "#bdc0a4", "#667f72", "POLICE");
-  building(c, 350, 318, 87, 74, "#dfb16f", "#c77455", "BELL HOUSE");
+  if (!w.flags.houseChewed)
+    building(c, 350, 318, 87, 74, "#dfb16f", "#c77455", "BELL HOUSE");
+  else {
+    path(
+      c,
+      [
+        [306, 318],
+        [393, 318],
+        [418, 304],
+        [330, 304],
+      ],
+      "#c9b28b",
+    );
+    rect(c, 311, 290, 25, 28, "#dfb16f", 0, ink);
+    path(
+      c,
+      [
+        [306, 290],
+        [318, 270],
+        [336, 283],
+        [339, 292],
+      ],
+      "#c77455",
+    );
+    line(
+      c,
+      [
+        [345, 311],
+        [369, 296],
+        [391, 308],
+      ],
+      "#937853",
+      5,
+    );
+    text(c, "OPEN PLAN", 365, 338, 8, "#7d6b4e");
+  }
   building(c, 507, 335, 124, 91, "#e8d9b5", "#b6644f", "", "hall");
   building(c, 760, 315, 108, 76, "#d4d9bd", "#7c978a", "HOSPITAL", "clinic");
   building(c, 890, 382, 65, 65, "#b5b5c0", "#85849b", "POST");
-  if (
-    !w.catSaved ||
-    w.history.some(
-      (h) => h.event === "cat" && h.response === "Send the fire brigade",
-    )
-  )
-    tree(c, 246, 352, 1.1, !w.catSaved);
+  if (!w.flags.treeRemoved) tree(c, 246, 352, 1.1, !w.catSaved);
   else {
     rect(c, 242, 340, 12, 12, "#a17c56", 2, ink);
     ellipse(c, 248, 340, 8, 3, "#d0b47d", ink);
@@ -1098,7 +1127,14 @@ export function render(
     rect(c, 207, 358, 32, 5, "#d4b371", 1, ink);
   }
   building(c, 136, 536, 105, 65, "#c66f56", "#685e55", "", "fire");
-  building(c, 346, 552, 93, 65, "#e7c17d", "#8a7c68", "BAKERY");
+  if (!w.flags.bakeryOpenAir)
+    building(c, 346, 552, 93, 65, "#e7c17d", "#8a7c68", "BAKERY");
+  else {
+    rect(c, 300, 514, 93, 38, "#e7c17d", 0, ink);
+    text(c, "ALFRESCO BAKERY", 346, 529, 7);
+    rect(c, 308, 537, 77, 15, "#a2916c", 0, ink);
+    for (let i = 0; i < 4; i++) tool(c, "bread", 319 + i * 19, 545, t, 0.25);
+  }
   building(c, 660, 558, 94, 64, "#8ea69a", "#c27655", "CORNER SHOP");
   // Plaza, fountain, lampposts, benches, road signs.
   ellipse(c, 625, 371, 43, 19, "#d9cbae", ink);
@@ -1323,7 +1359,7 @@ export function render(
   }
   if (fx.fire) {
     tool(c, "firefighter", 250, 300, t, 0.65);
-    if (w.history.some((h) => h.event === "fire-permit")) {
+    if (w.flags.firePermit) {
       for (let i = 0; i < 3; i++) {
         path(
           c,
@@ -1342,13 +1378,32 @@ export function render(
       }
     }
   }
-  if (fx.moon) {
-    const s = 0.65 + Math.min(5, fx.moon) * 0.09;
-    ellipse(c, 760, 86, 48 * s, 48 * s, "#e4dabc", ink);
-    ellipse(c, 745, 73, 9 * s, 9 * s, "#c6c7a9");
-    ellipse(c, 777, 97, 13 * s, 13 * s, "#c6c7a9");
-    ellipse(c, 753, 110, 6, 6, "#c6c7a9");
-    text(c, "P", 760, 95, 18, "#9eaa8b");
+  if (fx.moon || e.id === "moon") {
+    const descending = e.id === "moon" && w.recent.at(-1) !== "moon";
+    const mx = descending ? 790 : 760,
+      my = descending ? 190 + Math.sin(t) * 3 : 86;
+    const ms = descending ? 1.35 : 0.65 + Math.min(5, fx.moon) * 0.09;
+    ellipse(c, mx, my, 48 * ms, 48 * ms, "#e4dabc", ink);
+    ellipse(c, mx - 15, my - 13, 9 * ms, 9 * ms, "#c6c7a9");
+    ellipse(c, mx + 17, my + 11, 13 * ms, 13 * ms, "#c6c7a9");
+    ellipse(c, mx - 7, my + 24, 6, 6, "#c6c7a9");
+    if (!descending) {
+      rect(c, mx + 22, my + 23, 20, 29, "#e9bb76", 1, ink);
+      text(c, "P", mx + 32, my + 36, 9);
+      text(c, "FINE", mx + 32, my + 45, 4);
+    } else {
+      ellipse(c, mx - 9, my - 1, 2, 3, ink);
+      ellipse(c, mx + 6, my - 1, 2, 3, ink);
+      line(
+        c,
+        [
+          [mx - 5, my + 10],
+          [mx + 4, my + 9],
+        ],
+        ink,
+        2,
+      );
+    }
   }
   if (fx.wind) {
     for (let i = 0; i < 3; i++)
@@ -1429,6 +1484,160 @@ export function render(
     );
   }
   // Caller location pulses during the call; direct operations share the same world coordinates.
+  // Visual callbacks live in the world, and keep their own durable flags.
+  if (fx.dinosaur && w.catSaved) {
+    const dx = 220 + Math.sin(t * 0.23) * 22;
+    ellipse(c, dx + 42, 357, 7, 5, "#d5a565", ink);
+    path(
+      c,
+      [
+        [dx + 37, 355],
+        [dx + 37, 347],
+        [dx + 42, 351],
+        [dx + 46, 347],
+        [dx + 48, 357],
+      ],
+      "#d5a565",
+    );
+    line(
+      c,
+      [
+        [dx + 37, 360],
+        [dx + 30, 355],
+      ],
+      "#99764e",
+      2,
+    );
+  }
+  if (fx.dinosaur && fx.bureaucracy) {
+    const dx = 220 + Math.sin(t * 0.23) * 22;
+    path(
+      c,
+      [
+        [dx + 23, 400],
+        [dx + 18, 410],
+        [dx + 25, 426],
+        [dx + 31, 410],
+      ],
+      "#cc7050",
+      ink,
+      1,
+    );
+    rect(c, dx - 15, 411, 20, 12, cream, 1, ink);
+    text(c, "STAFF", dx - 5, 420, 4);
+  }
+  if (w.flags.ladderMoon) {
+    c.save();
+    c.translate(728, 280);
+    c.rotate(-0.22);
+    tool(c, "ladder", 0, 0, t, 0.8);
+    tool(c, "ladder", 0, -50, t, 0.8);
+    tool(c, "ladder", 0, -100, t, 0.8);
+    c.restore();
+    person(c, 710, 187, t, "#ca7756", 0.65);
+  }
+  if (w.flags.busFlying) {
+    const bx = 680 + Math.sin(t * 0.4) * 25,
+      by = 222 + Math.sin(t * 1.3) * 6;
+    rect(c, bx - 35, by - 22, 70, 28, "#d4b46a", 6, ink);
+    for (let i = 0; i < 4; i++)
+      rect(c, bx - 26 + i * 14, by - 17, 10, 10, "#d9e5c9", 1, ink);
+    line(
+      c,
+      [
+        [bx - 20, by + 7],
+        [bx - 23, by + 22],
+      ],
+      ink,
+      3,
+    );
+    line(
+      c,
+      [
+        [bx + 24, by + 7],
+        [bx + 23, by + 22],
+      ],
+      ink,
+      3,
+    );
+    text(c, "BUS STOP", bx, by + 38, 7);
+  }
+  if (w.flags.mayorCabinet) {
+    for (let i = 0; i < 3; i++) {
+      const x = 465 + i * 17;
+      rect(c, x, 350, 10, 17, "#b9c5b0", 2, ink);
+      rect(c, x + 2, 354, 6, 8, "#eadb9a");
+      ellipse(c, x + 5, 350, 3, 1, "#7e967b");
+    }
+    text(c, "CABINET", 491, 383, 6);
+  }
+  if (fx.ducks > 1) {
+    for (let i = 0; i < 2; i++) {
+      const dx = 622 + Math.sin(t * 0.25 + i) * 35 + i * 50,
+        dy = 590 + Math.sin(t + i) * 4;
+      tool(c, "boat", dx, dy, t, 0.48);
+      duck(c, dx - 5, dy - 15, t);
+    }
+    text(c, "INTERNATIONAL WATERS", 663, 624, 7, "#3d706b");
+  }
+  const activeIncident = w.recent.at(-1) !== e.id;
+  if (activeIncident && e.id === "pigeon") bird(c, 520, 344, t, 1.4);
+  if (activeIncident && e.id === "helipad") helicopter(c, 346, 402, t);
+  if (activeIncident && e.id === "roof") {
+    car(c, 346, 475, "#ecd286");
+    text(c, "ICE CREAM", 346, 449, 6);
+  }
+  if (activeIncident && e.id === "mayor") {
+    rect(c, 543, 320, 45, 65, "#b86b55", 4, ink);
+    rect(c, 548, 327, 27, 44, "#a8c8b7", 2, ink);
+    person(c, 560, 363, t, "#4f6573", 0.8);
+    line(
+      c,
+      [
+        [548, 342],
+        [573, 342],
+      ],
+      "#57715e",
+      2,
+    );
+    rect(c, 578, 337, 5, 14, cream, 1);
+    text(c, "CRISPS", 565, 380, 5, cream);
+  }
+  if (activeIncident && e.id === "icecream") {
+    car(c, 690, 425, "#ecd286");
+    rect(c, 674, 389, 35, 15, "#f0d2a4", 3, ink);
+    text(c, "ICE CREAM", 690, 399, 5);
+    ellipse(c, 692, 385, 6, 6, "#e4b5ba", ink);
+  }
+  if (activeIncident && e.id === "dino-house") {
+    dinosaur(c, 365 + Math.sin(t * 2) * 4, 336, t, 0.6);
+    for (let i = 0; i < 5; i++)
+      rect(c, 327 + i * 7, 297 + Math.sin(t * 8 + i) * 9, 4, 3, "#deaf69", 1);
+  }
+  if (!op && Math.floor(t / 6) % 3 === 0) {
+    const quip = fx.magnet
+      ? "THAT WAS MY CAR."
+      : fx.pigeons
+        ? "BREAD IS MONEY."
+        : fx.dinosaur
+          ? "IT HAS A TIE NOW?"
+          : w.count
+            ? "THIS IS NORMAL."
+            : "NICE DAY.";
+    rect(c, 530, 469, 111, 21, "#f3eacb", 5, "#889a76");
+    text(c, quip, 585, 483, 7, "#5b7054");
+    path(
+      c,
+      [
+        [555, 490],
+        [561, 498],
+        [568, 490],
+      ],
+      "#f3eacb",
+      "#889a76",
+      1,
+    );
+  }
   if (!op && !celebrate) {
     const [x, y] = e.location;
     ellipse(

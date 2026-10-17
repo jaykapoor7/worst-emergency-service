@@ -9,7 +9,8 @@
     "check": "tsc --noEmit",
     "lint": "eslint src",
     "test": "node --import tsx --test tests/*.test.ts",
-    "portable": "npm run build && node scripts/portable.mjs"
+    "portable": "npm run build && node scripts/portable.mjs",
+    "test:ui": "node --import tsx scripts/verify-ui.tsx"
   },
   "dependencies": {
     "react": "18.3.1",
@@ -24,6 +25,7 @@
     "eslint": "9.15.0",
     "@eslint/js": "9.15.0",
     "typescript-eslint": "8.16.0",
-    "tsx": "4.19.2"
+    "tsx": "4.19.2",
+    "jsdom": "25.0.1"
   }
 }

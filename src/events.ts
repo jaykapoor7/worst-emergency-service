@@ -255,7 +255,7 @@ export const events: Emergency[] = [
     caller: "MAYOR · MUFFLED",
     title: "I’m inside a vending machine.",
     line: "“I leaned in for the crisps. It has taken my tie. I think it knows who I am.”",
-    location: [500, 315],
+    location: [565, 365],
     responses: [
       r(
         "Shake the machine professionally",
@@ -289,7 +289,7 @@ export const events: Emergency[] = [
     caller: "AIR TRAFFIC CONTROL · BAKERY AIRSPACE",
     title: "The helicopter refuses to land.",
     line: "“The pilot says the helipad has bad energy. The helicopter is hovering over a sourdough starter.”",
-    location: [790, 295],
+    location: [346, 475],
     responses: [
       r(
         "Drop a more welcoming helipad",
@@ -391,7 +391,7 @@ export const events: Emergency[] = [
     caller: "BAKERY · UPSTAIRS",
     title: "There is a van on our roof.",
     line: "“We’ve put it on the menu. Nobody has ordered it yet. It keeps playing Greensleeves.”",
-    location: [790, 290],
+    location: [346, 475],
     responses: [
       r(
         "Magnetize the roof",
