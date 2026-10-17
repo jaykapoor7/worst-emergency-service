@@ -1520,7 +1520,7 @@ export function render(
     for (let i = 0; i < Math.min(4, fx.bureaucracy + 1); i++)
       person(c, 558 + i * 12, 393 + (i % 2) * 5, t + i, "#7b6881", 0.45);
   }
-  if (fx.moon || e.id === "moon") {
+  if ((fx.moon && w.count >= 25) || e.id === "moon") {
     const descending = e.id === "moon" && w.recent.at(-1) !== "moon";
     const mx = descending ? 790 : 760,
       my = descending ? 190 + Math.sin(t) * 3 : 86;

@@ -10,6 +10,8 @@ test("All authored branches have a valid follow-up and three working response me
   assert.ok(events.length >= 30);
   for (const e of events) {
     assert.equal(e.responses.length, 3);
+    if (e.tier < 3)
+      assert.ok(e.responses.every((r) => !r.effects.includes("moon")), `${e.id} reveals the moon before President`);
     for (const r of e.responses) {
       assert.ok(r.label && r.result);
       if (r.next)
@@ -19,6 +21,12 @@ test("All authored branches have a valid follow-up and three working response me
         );
     }
   }
+});
+test("The dinosaur's company-car response causes the car-ball emergency", () => {
+  const job = events.find((e) => e.id === "dino-job")!;
+  const cars = job.responses.find((r) => r.next === "carball")!;
+  assert.equal(cars.mechanic, "magnet");
+  assert.ok(cars.effects.includes("magnet"));
 });
 test("The opening creates distinct causal follow-up calls", () => {
   for (const [i, next] of [
