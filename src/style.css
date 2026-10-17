@@ -1885,3 +1885,315 @@ footer a {
     font-size: 27px;
   }
 }
+
+/* Bellwether on air: clean cels, suburban color and punchy comic timing. */
+:root {
+  color: #29283d;
+  background: #f7edda;
+}
+body {
+  background: radial-gradient(ellipse at 15% 0%, #fff9ed, transparent 60%),
+    #f7edda;
+}
+header {
+  border-bottom: 2px solid #29283d;
+}
+h1,
+h2 {
+  font-family: "DM Sans", Arial, sans-serif;
+  font-weight: 700;
+}
+h1 {
+  letter-spacing: -2.2px;
+  line-height: 1.04;
+}
+h1 em {
+  color: #d34f48;
+  font-style: normal;
+  font-weight: 700;
+}
+.masthead .eyebrow {
+  color: #5d5667;
+}
+.wordmark small {
+  color: #696274;
+}
+.world {
+  border: 3px solid #29283d;
+  border-radius: 13px;
+  box-shadow: 0 7px 0 #29283d;
+}
+.camera-strip {
+  background: #32344a;
+  color: #fff9e9;
+  border-bottom: 3px solid #29283d;
+  padding: 13px 15px;
+}
+.camera-strip i {
+  background: #8cde8b;
+  box-shadow: 0 0 0 3px #8cde8b33;
+}
+.world-ticker {
+  background: #ffe08a;
+  border-top: 3px solid #29283d;
+}
+.ticker-label {
+  background: #29283d;
+  color: #fff9e9;
+  border: 0;
+  border-radius: 3px;
+  transform: rotate(-3deg);
+  padding: 7px;
+  font-size: 7px;
+}
+.world-ticker p {
+  color: #343348;
+  font-size: 11px;
+  font-weight: 600;
+}
+.town-caption {
+  background: #fff8e9;
+  border-top-color: #c6bca8;
+  color: #62596b;
+}
+.town-caption button {
+  color: #51445d;
+}
+.dispatch {
+  border: 3px solid #29283d;
+  border-radius: 13px;
+  transform: none;
+  background: #fff9ec;
+  box-shadow: 5px 7px 0 #29283d;
+  overflow: hidden;
+}
+.dispatch::after,
+.dispatch-label::before {
+  display: none;
+}
+.dispatch-label {
+  background: #d95c55;
+  color: #fff;
+  border-bottom: 3px solid #29283d;
+  border-radius: 0;
+  box-shadow: none;
+}
+.dispatch-label.resolved {
+  background: #448c74;
+}
+.call-content {
+  background: none;
+}
+.call-status {
+  margin-bottom: 6px;
+  min-height: 48px;
+  color: #b54040;
+}
+.phone-art {
+  width: 81px;
+  height: 55px;
+}
+.caller-scene {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 3px 0 18px;
+}
+.caller-portrait {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+  transform: rotate(-3deg);
+  overflow: visible;
+}
+.caller {
+  color: #655b70;
+  font-size: 8px;
+  line-height: 1.8;
+}
+.caller-caption {
+  display: inline-block;
+  margin-top: 7px;
+  font:
+    700 8px "DM Sans",
+    sans-serif;
+  letter-spacing: 0.9px;
+  background: #f9d780;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+.call-content h2 {
+  font-size: clamp(25px, 2.2vw, 35px);
+  letter-spacing: -1.1px;
+  line-height: 1.08;
+}
+.dialogue {
+  color: #51495d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.call-content .dialogue {
+  position: relative;
+  background: white;
+  border: 2px solid #29283d;
+  border-radius: 3px 14px 14px 14px;
+  padding: 12px 14px;
+  box-shadow: 2px 3px 0 #ddd3c4;
+}
+.responses button {
+  border: 2px solid #29283d;
+  background: #bfe3e7;
+  box-shadow: 0 4px 0 #29283d;
+  border-radius: 7px;
+  min-height: 61px;
+}
+.responses button:nth-child(2) {
+  background: #ffe094;
+}
+.responses button:nth-child(3) {
+  background: #e6c9e8;
+}
+.responses button:hover {
+  background: #fff0b4;
+  border-color: #29283d;
+  box-shadow: 0 6px 0 #29283d;
+}
+.responses button:active {
+  box-shadow: 0 0 0 #29283d;
+}
+.response-number,
+.response-doodle,
+.responses b {
+  color: #3d3a51;
+}
+.responses button > span:nth-of-type(2) {
+  font-size: 12px;
+  font-weight: 700;
+}
+.response-heading {
+  color: #5c5066;
+  font-size: 7px;
+}
+.fineprint {
+  color: #82748a;
+}
+.dispatch-bottom {
+  background: #eee3ce;
+  color: #74657b;
+}
+.primary {
+  border: 2px solid #29283d;
+  border-radius: 6px;
+  background: #424b70;
+  color: #fff8e7;
+  box-shadow: 0 4px 0 #29283d;
+}
+.primary:hover {
+  background: #59638b;
+}
+.primary:active {
+  box-shadow: 0 1px 0 #29283d;
+}
+.round-button {
+  border-color: #9b8c9e;
+  background: #fff9ed;
+}
+.career-track {
+  background: #dfd1b8;
+  height: 6px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.career-track i {
+  background: #e3a345;
+}
+.portrait-head {
+  animation: caller-bob 2.4s steps(2, end) infinite;
+  transform-origin: 56px 80px;
+}
+.portrait-mouth {
+  animation: caller-talk 0.64s steps(2, end) infinite;
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+.portrait-eyes {
+  animation: caller-blink 5s steps(1, end) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.portrait-phone {
+  animation: caller-phone 2.4s steps(2, end) infinite;
+  transform-origin: 25px 95px;
+}
+@keyframes caller-bob {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50%,
+  95% {
+    transform: rotate(3deg) translateY(1px);
+  }
+}
+@keyframes caller-talk {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes caller-blink {
+  0%,
+  92%,
+  96%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes caller-phone {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50%,
+  95% {
+    transform: rotate(-4deg);
+  }
+}
+@media (max-width: 760px) {
+  h1 {
+    letter-spacing: -1.5px;
+  }
+  .dispatch {
+    border: 3px solid #29283d;
+  }
+  .caller-portrait {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+  .caller-scene {
+    margin-bottom: 17px;
+  }
+  .call-content h2 {
+    font-size: 30px;
+  }
+  .world-ticker p {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portrait-head,
+  .portrait-mouth,
+  .portrait-eyes,
+  .portrait-phone {
+    animation: none;
+  }
+}

@@ -4,7 +4,13 @@ import { fresh, rank, SAVE_KEY, titles, validSession } from "./model";
 import type { Outcome, Session } from "./model";
 import { HELP, Operation } from "./operation";
 import World from "./World";
-import { Phone, Seal, Doodle, RankBadge } from "./Illustrations";
+import {
+  Phone,
+  Seal,
+  Doodle,
+  RankBadge,
+  CallerPortrait,
+} from "./Illustrations";
 import { complete, advance, acknowledgePromotion } from "./session";
 import type { Hud } from "./World";
 import { play, setMute, unlock } from "./audio";
@@ -390,7 +396,13 @@ export default function App() {
                   <span>LINE CONNECTED</span>
                   <span className="waveform">▂ ▆ ▃ ▇ ▄ ▂</span>
                 </div>
-                <div className="caller">{event.caller}</div>
+                <div className="caller-scene">
+                  <CallerPortrait seed={event.id} />
+                  <div>
+                    <div className="caller">{event.caller}</div>
+                    <span className="caller-caption">LIVE FROM THE SCENE</span>
+                  </div>
+                </div>
                 <h2>{event.title}</h2>
                 <p className="dialogue">{event.line}</p>
                 <div className="response-heading">

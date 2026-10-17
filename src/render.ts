@@ -1,8 +1,8 @@
 import type { World, Emergency } from "./model";
 import type { Operation } from "./operation";
 type C = CanvasRenderingContext2D;
-const ink = "#35493e",
-  cream = "#fff1d1";
+const ink = "#25243b",
+  cream = "#fff8e9";
 function path(c: C, points: number[][], fill: string, stroke = ink, width = 2) {
   c.beginPath();
   points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
@@ -102,9 +102,9 @@ export function tree(c: C, x: number, y: number, s = 1, cat = false) {
     "#806448",
     4,
   );
-  ellipse(c, -17, -59, 25, 27, "#759c72", ink);
-  ellipse(c, 16, -64, 27, 30, "#85ac79", ink);
-  ellipse(c, 0, -83, 28, 27, "#91b47e", ink);
+  ellipse(c, -17, -59, 25, 27, "#53a764", ink);
+  ellipse(c, 16, -64, 27, 30, "#68ba68", ink);
+  ellipse(c, 0, -83, 28, 27, "#7cc977", ink);
   line(
     c,
     [
@@ -112,7 +112,7 @@ export function tree(c: C, x: number, y: number, s = 1, cat = false) {
       [-2, -94],
       [8, -90],
     ],
-    "#b7cb92",
+    "#aae293",
     2,
   );
   if (cat) {
@@ -175,7 +175,7 @@ function building(
       [w / 2 + 25, -14],
       [w / 2, 0],
     ],
-    "#a9ae95",
+    "#b4a8bd",
   );
   path(
     c,
@@ -317,43 +317,51 @@ export function person(
   c.save();
   c.translate(x, y);
   c.scale(scale, scale);
-  const gait = Math.sin(t * (panic ? 15 : 7));
-  ellipse(c, 1, 3, 7, 3, "#32574422");
+  // Held poses at 12 fps give the little cast a hand-drawn TV-animation cadence.
+  const frame = Math.floor(t * 12) / 12;
+  const gait = Math.sin(frame * (panic ? 15 : 7));
+  const skin = ["#f4bb91", "#b97957", "#d99b73"][
+    Math.abs(Math.floor(x + y)) % 3
+  ];
+  const bob = Math.abs(gait) * (panic ? 2 : 0.65);
+  ellipse(c, 1, 3, 9, 3, "#32574422");
+  c.translate(0, -bob);
+  for (const side of [-1, 1]) {
+    const foot = side * (4 + gait * 2.5);
+    line(
+      c,
+      [
+        [side * 3, -10],
+        [foot, -1],
+      ],
+      ink,
+      4.5,
+    );
+    line(
+      c,
+      [
+        [foot - 1, 0],
+        [foot + 3, 0],
+      ],
+      "#262437",
+      3.5,
+    );
+  }
+  rect(c, -6, -24, 13, 15, color, 4, ink);
   line(
     c,
     [
-      [0, -8],
-      [-3 - gait * 2, 0],
+      [-5, -21],
+      [-10 - gait * 2, panic ? -33 : -12],
     ],
     ink,
-    2.5,
+    5,
   );
   line(
     c,
     [
-      [1, -8],
-      [4 + gait * 2, 0],
-    ],
-    ink,
-    2.5,
-  );
-  path(
-    c,
-    [
-      [-4, -21],
-      [4, -21],
-      [6, -8],
-      [-5, -8],
-    ],
-    color,
-    "",
-    0,
-  );
-  line(
-    c,
-    [
-      [-3, -18],
-      [-8 - gait * 2, -12 - (panic ? 15 : 0)],
+      [-5, -21],
+      [-10 - gait * 2, panic ? -33 : -12],
     ],
     color,
     3,
@@ -361,27 +369,83 @@ export function person(
   line(
     c,
     [
-      [4, -18],
-      [9 + gait * 2, -14 - (panic ? 13 : 0)],
+      [6, -21],
+      [11 + gait * 2, panic ? -32 : -13],
+    ],
+    ink,
+    5,
+  );
+  line(
+    c,
+    [
+      [6, -21],
+      [11 + gait * 2, panic ? -32 : -13],
     ],
     color,
     3,
   );
-  ellipse(c, 0, -27, 5.5, 6.5, "#e8b48a", ink);
+  ellipse(c, -10 - gait * 2, panic ? -34 : -11, 2.5, 3, skin, ink);
+  ellipse(c, 11 + gait * 2, panic ? -33 : -12, 2.5, 3, skin, ink);
+  ellipse(c, 0, -33, 8, 10, skin, ink);
+  ellipse(c, -7, -32, 2.5, 3, skin, ink);
+  // Two white eyes, an unmistakable nose and an incredulous little mouth.
+  const blink = !panic && Math.sin(frame * 0.8 + x) > 0.994;
+  ellipse(c, -1, -35, 3, blink ? 0.6 : 3.4, "#fff", ink);
+  ellipse(c, 4, -35, 3, blink ? 0.6 : 3.4, "#fff", ink);
+  if (!blink) {
+    ellipse(c, 0, -34.5, 1.1, 1.5, ink);
+    ellipse(c, 5, -34.5, 1.1, 1.5, ink);
+  }
   path(
     c,
     [
-      [-5, -29],
-      [-4, -34],
-      [2, -35],
-      [5, -31],
-      [4, -29],
+      [6, -33],
+      [11, -30],
+      [6, -29],
     ],
-    "#574b3a",
-    "",
-    0,
+    skin,
+    ink,
+    1,
   );
-  ellipse(c, 2, -27, 1, 1, ink);
+  path(
+    c,
+    [
+      [-7, -36],
+      [-7, -42],
+      [-3, -45],
+      [4, -43],
+      [7, -39],
+      [1, -40],
+      [-2, -38],
+    ],
+    "#514039",
+    ink,
+    1.4,
+  );
+  if (panic) {
+    ellipse(c, 3, -27, 3, 2.5 + Math.abs(gait), "#7e303e", ink);
+    line(
+      c,
+      [
+        [-4, -40],
+        [0, -42],
+        [6, -40],
+      ],
+      ink,
+      1.2,
+    );
+  } else
+    line(
+      c,
+      [
+        [0, -27],
+        [4, -26],
+        [6, -27],
+      ],
+      ink,
+      1,
+    );
+
   c.restore();
 }
 export function dinosaur(
@@ -393,7 +457,7 @@ export function dinosaur(
   swim = false,
 ) {
   c.save();
-  c.translate(x, y + Math.sin(t * 3) * 2);
+  c.translate(x, y + Math.sin((Math.floor(t * 12) / 12) * 3) * 2);
   c.scale(s, s);
   ellipse(c, 0, 3, 50, 13, "#3e62492b");
   path(
@@ -405,9 +469,9 @@ export function dinosaur(
       [-64, -49],
       [-31, -48],
     ],
-    "#86a37b",
+    "#68b872",
   );
-  ellipse(c, -3, -30, 43, 27, "#83a675", ink);
+  ellipse(c, -3, -30, 43, 27, "#79c980", ink);
   path(
     c,
     [
@@ -420,10 +484,24 @@ export function dinosaur(
       [53, -79],
       [41, -31],
     ],
-    "#8aaf7d",
+    "#8bd493",
   );
-  ellipse(c, 59, -99, 4, 5, cream);
-  ellipse(c, 60, -100, 1.8, 2.7, ink);
+  ellipse(c, 55, -102, 7, 9, "#fff", ink);
+  ellipse(c, 65, -102, 7, 9, "#fff", ink);
+  ellipse(c, 57, -101, 2.1, 3, ink);
+  ellipse(c, 67, -101, 2.1, 3, ink);
+  line(
+    c,
+    [
+      [49, -113],
+      [57, -115],
+      [61, -112],
+    ],
+    ink,
+    2.5,
+  );
+  ellipse(c, 74, -92, 9, 7, "#78c981", ink);
+  ellipse(c, 77, -94, 1.2, 1.2, ink);
   line(
     c,
     [
@@ -439,7 +517,7 @@ export function dinosaur(
       [-26, -16],
       [-25 + Math.sin(t * 6) * 4, 0],
     ],
-    "#5a805b",
+    "#50a66a",
     11,
   );
   line(
@@ -448,7 +526,7 @@ export function dinosaur(
       [15, -14],
       [19 - Math.sin(t * 6) * 4, 0],
     ],
-    "#5a805b",
+    "#50a66a",
     11,
   );
   line(
@@ -458,7 +536,7 @@ export function dinosaur(
       [47, -45],
       [50, -51],
     ],
-    "#5a805b",
+    "#50a66a",
     4,
   );
   for (let i = 0; i < 4; i++)
@@ -469,7 +547,7 @@ export function dinosaur(
         [-30 + i * 14, -61 - i],
         [-23 + i * 14, -50 - i],
       ],
-      "#b3bf81",
+      "#ffd267",
       ink,
       1,
     );
@@ -876,9 +954,9 @@ export function render(
   const t = reduced || celebrate ? 0 : time;
   const { effects: fx } = w;
   c.clearRect(0, 0, 1000, 640);
-  rect(c, 0, 0, 1000, 640, "#c8dfd9");
+  rect(c, 0, 0, 1000, 640, "#9cdbf3");
   // The town is an illustrated stage: distant hills, streets, individual architecture.
-  ellipse(c, 855, 72, 34, 34, "#efc66e");
+  ellipse(c, 855, 72, 34, 34, "#ffe26d");
   path(
     c,
     [
@@ -895,7 +973,7 @@ export function render(
       [1000, 280],
       [0, 280],
     ],
-    "#9ebba3",
+    "#75af78",
     "",
   );
   path(
@@ -911,14 +989,14 @@ export function render(
       [1000, 640],
       [0, 640],
     ],
-    "#b9ce9d",
+    "#a4d77b",
     "",
   );
   for (let i = 0; i < 4; i++) {
     const x = ((i * 303 + t * 6) % 1300) - 130;
-    ellipse(c, x, 61 + (i % 2) * 31, 40, 9, "#f1ebce");
-    ellipse(c, x - 14, 56 + (i % 2) * 31, 17, 14, "#f1ebce");
-    ellipse(c, x + 9, 52 + (i % 2) * 31, 22, 17, "#f1ebce");
+    ellipse(c, x, 61 + (i % 2) * 31, 40, 9, "#fffdf3");
+    ellipse(c, x - 14, 56 + (i % 2) * 31, 17, 14, "#fffdf3");
+    ellipse(c, x + 9, 52 + (i % 2) * 31, 22, 17, "#fffdf3");
   }
   // Grass tufts, flower clusters and garden paths are seeded, not allocated each frame.
   for (let i = 0; i < 100; i++) {
@@ -947,7 +1025,7 @@ export function render(
       [1000, 496],
       [0, 469],
     ],
-    "#d6ccb0",
+    "#e8d5b4",
     "",
   );
   path(
@@ -958,7 +1036,7 @@ export function render(
       [1000, 482],
       [0, 455],
     ],
-    "#8f9886",
+    "#878996",
     "",
   );
   line(
@@ -967,7 +1045,7 @@ export function render(
       [0, 435],
       [1000, 462],
     ],
-    "#e7deb8",
+    "#ffeb99",
     2,
   );
   path(
@@ -978,7 +1056,7 @@ export function render(
       [558, 640],
       [511, 640],
     ],
-    "#d6ccb0",
+    "#e8d5b4",
     "",
   );
   path(
@@ -989,7 +1067,7 @@ export function render(
       [547, 640],
       [522, 640],
     ],
-    "#8f9886",
+    "#878996",
     "",
   );
   for (let i = 0; i < 12; i++)
@@ -999,7 +1077,7 @@ export function render(
         [453 + i * 6, 220 + i * 34],
         [456 + i * 6, 232 + i * 34],
       ],
-      "#e7deb8",
+      "#ffeb99",
       2,
     );
   for (let i = 0; i < 6; i++) rect(c, 444 + i * 13, 419, 7, 43, "#eee4c2", 0);
@@ -1009,7 +1087,7 @@ export function render(
   c.bezierCurveTo(860, 320, 935, 480, 840, 640);
   c.lineTo(1000, 640);
   c.closePath();
-  c.fillStyle = "#7aada9";
+  c.fillStyle = "#62badd";
   c.fill();
   for (let i = 0; i < 18; i++) {
     const x = 950 + (i % 3) * 18,
@@ -1020,7 +1098,7 @@ export function render(
         [x + Math.sin(t + i) * 3, y],
         [x + 20, y],
       ],
-      "#c0d6bd",
+      "#aee5f3",
       1,
     );
   }
@@ -1058,9 +1136,59 @@ export function render(
   tree(c, 390, 236, 0.68);
   tree(c, 95, 560, 0.8);
   tree(c, 820, 578, 0.8);
-  building(c, 140, 328, 86, 68, "#bdc0a4", "#667f72", "POLICE");
+  // A familiar suburban establishing shot, gradually ruined by the player's choices.
+  for (let i = 0; i < 10; i++) {
+    const x = 279 + i * 13;
+    path(
+      c,
+      [
+        [x, 360],
+        [x, 342],
+        [x + 4, 337],
+        [x + 8, 342],
+        [x + 8, 360],
+      ],
+      "#fff8e9",
+      ink,
+      1.2,
+    );
+  }
+  line(
+    c,
+    [
+      [275, 350],
+      [410, 350],
+    ],
+    "#fff8e9",
+    3,
+  );
+  rect(c, 415, 341, 4, 28, "#97745d", 0, ink);
+  rect(c, 407, 334, 22, 14, "#ec655b", 4, ink);
+  line(
+    c,
+    [
+      [426, 335],
+      [426, 327],
+      [433, 327],
+    ],
+    ink,
+    2,
+  );
+  line(
+    c,
+    [
+      [688, 367],
+      [688, 310],
+    ],
+    ink,
+    3,
+  );
+  rect(c, 672, 304, 29, 19, "#fff8e9", 1, ink);
+  rect(c, 680, 310, 12, 9, "#f28460", 0, ink);
+  ellipse(c, 686, 325, 10, 3, "#fff8e9", ink);
+  building(c, 140, 328, 86, 68, "#becde5", "#62789f", "POLICE");
   if (!w.flags.houseChewed)
-    building(c, 350, 318, 87, 74, "#dfb16f", "#c77455", "BELL HOUSE");
+    building(c, 350, 318, 87, 74, "#f7d49a", "#d86e5a", "BELL HOUSE");
   else {
     path(
       c,
@@ -1072,7 +1200,7 @@ export function render(
       ],
       "#c9b28b",
     );
-    rect(c, 311, 290, 25, 28, "#dfb16f", 0, ink);
+    rect(c, 311, 290, 25, 28, "#f7d49a", 0, ink);
     path(
       c,
       [
@@ -1081,7 +1209,7 @@ export function render(
         [336, 283],
         [339, 292],
       ],
-      "#c77455",
+      "#d86e5a",
     );
     line(
       c,

@@ -192,3 +192,86 @@ export function RankBadge() {
     </svg>
   );
 }
+
+/** An original cast of suburban callers, built from clean animation cels. */
+export function CallerPortrait({ seed }: { seed: string }) {
+  const variant = [...seed].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 4;
+  const skin = ["#f4c099", "#c88a65", "#e8ac83", "#9f674c"][variant];
+  const shirt = ["#50a7b8", "#ef7d69", "#af8ed4", "#f2bd5a"][variant];
+  return (
+    <svg
+      className={`caller-portrait cast-${variant}`}
+      viewBox="0 0 112 112"
+      aria-hidden="true"
+    >
+      <defs>
+        <clipPath id={`portrait-${seed}`}>
+          <rect x="2" y="2" width="108" height="108" rx="15" />
+        </clipPath>
+      </defs>
+      <g
+        clipPath={`url(#portrait-${seed})`}
+        stroke="#25243b"
+        strokeWidth="2.3"
+        strokeLinejoin="round"
+      >
+        <path d="M0 0h112v112H0z" fill="#a6ddf1" stroke="none" />
+        <path
+          d="M0 64 25 39l30 23 30-21 27 16v55H0z"
+          fill="#8fca78"
+          stroke="none"
+        />
+        <path d="M7 112q3-32 35-33h28q32 2 36 33" fill={shirt} />
+        <path d="m45 71-2 17q14 12 26-1l-4-17" fill={skin} />
+        <g className="portrait-head">
+          <path
+            d="M31 35q0-22 26-22 27 1 27 25l-3 24q-2 23-23 23-22-1-25-22z"
+            fill={skin}
+          />
+          <path d="M32 49q-13-8-13 4 0 13 15 10" fill={skin} />
+          <path
+            d="M31 42 26 29l8-16 21-7 22 8 9 19-12 4-5-13-17 4-10-4-2 16z"
+            fill={["#76492f", "#39363e", "#d78638", "#534444"][variant]}
+          />
+          <g className="portrait-eyes" fill="white">
+            <ellipse cx="49" cy="45" rx="10" ry="11" />
+            <ellipse cx="67" cy="45" rx="10" ry="11" />
+          </g>
+          <g fill="#25243b" stroke="none">
+            <ellipse cx="52" cy="46" rx="2.6" ry="3.4" />
+            <ellipse cx="70" cy="46" rx="2.6" ry="3.4" />
+          </g>
+          <path d="m72 48 14 10-15 3" fill={skin} />
+          <path d="m39 29 16-3m9 1 14 4" fill="none" strokeWidth="3" />
+          <path
+            className="portrait-mouth"
+            d="M49 68q11 7 22-1l-2 8q-9 7-18-1z"
+            fill="#743143"
+          />
+          <path d="M51 69h17" stroke="white" strokeWidth="3" />
+          {variant === 2 && (
+            <path
+              d="M36 42h22v16H37zm23 0h22v16H59m-1-11h3"
+              fill="none"
+              strokeWidth="2"
+            />
+          )}
+        </g>
+        <g className="portrait-phone">
+          <path d="m24 54-9 3 3 25 10 5 7-10-7-5z" fill="#4e5366" />
+          <path d="M22 83q-9-12-13-2l10 22 15-7-1-15q-5-8-9-3" fill={skin} />
+        </g>
+      </g>
+      <rect
+        x="2"
+        y="2"
+        width="108"
+        height="108"
+        rx="15"
+        fill="none"
+        stroke="#25243b"
+        strokeWidth="3"
+      />
+    </svg>
+  );
+}
