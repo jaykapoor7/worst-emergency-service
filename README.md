@@ -1,6 +1,8 @@
 # The World's Worst Emergency Service
 
-A standalone, illustrated browser game by Jay Kapoor. A cat needs rescuing. Deploy a dinosaur. The dinosaur eats a house. Somehow, you get promoted.
+An illustrated browser game by Jay Kapoor. A cat needs rescuing. Deploy a dinosaur. The dinosaur eats a house. Somehow, you get promoted.
+
+Play it at **https://emergency.kapoorjay.com**.
 
 ## Play
 
@@ -8,14 +10,14 @@ Choose one of three responses to a call, operate the response directly in the to
 
 - 34 authored emergencies and 102 response branches.
 - Five direct response interactions: drag a vehicle or creature, aim one rescue line, sweep cars with a magnet, place a demolition charge, or choose a landing point. Administrative choices take effect immediately. No operation uses a countdown or repeated taps.
-- Original procedural Canvas illustrations, moving citizens and traffic, and persistent visual combinations. A ringing Bakelite phone, animated paper dispatch slips, illustrated response keys, impact stamps and an unfurling presidential banner form the interface.
+- Procedural Canvas illustrations with moving citizens and traffic. Changes to the town persist and combine. The interface uses a ringing phone, paper dispatch slips, illustrated response keys, impact stamps and a presidential banner.
 - Local saves, case history, mute, confirmation before New Game, keyboard controls, touch controls, and reduced ambient motion.
 - Original synthesized ring, siren, stamp, crash, success, and promotion sounds. Audio starts after interaction.
 - No accounts, backend, AI API, paid service, tracking, or external runtime network requests.
 
 ## Development
 
-Requires Node.js 20.19+ or 22.12+.
+React 18, TypeScript and Vite, with the town drawn on Canvas. Requires Node.js 20.19+ or 22.12+.
 
 ```sh
 npm ci
@@ -32,6 +34,8 @@ npm run test:ui
 npm run build
 npm run portable
 ```
+
+`npm test` runs the engine tests with Node's test runner. `npm run test:ui` mounts the React UI in jsdom and plays 30 cases through it.
 
 `npm run portable` builds a complete single-file game at `release/PLAY.html`, including fonts. Open that file in a desktop browser without a server. Saving on `file:` origins depends on browser support; the app reports when storage is unavailable. Serving the game over HTTP/HTTPS gives it a stable save origin. Moving between origins does not transfer saves.
 
@@ -65,14 +69,14 @@ Extend `Mechanic`, add its input/scoring logic to `Operation`, provide instructi
 
 ## Deployment
 
-This project must remain separate from `kapoorjay.com` and StrayPaw.
+This project stays separate from `kapoorjay.com` and StrayPaw.
 
+- Live: https://emergency.kapoorjay.com
 - GitHub: `jaykapoor7/worst-emergency-service`
-- Independent Vercel project: `worst-emergency-service`
-- Intended custom domain: `emergency.kapoorjay.com`
+- Vercel project: `worst-emergency-service`
 - Framework: Vite; install: `npm ci`; build: `npm run build`; output: `dist`
 
-Import this repository into its own Vercel project. Once the deployment is READY, open the production URL and exercise several operations, refresh persistence, mute, and New Game on desktop and a phone. Add only `emergency.kapoorjay.com` under that project's Domains. Use the exact DNS value Vercel returns for this subdomain; preserve all apex and existing portfolio/StrayPaw records. A configured domain is not verified until its DNS, certificate and HTTPS response work.
+After a deployment is READY, check several operations, refresh persistence, mute, and New Game on desktop and a phone. DNS for the subdomain must not change the apex or the existing portfolio and StrayPaw records.
 
 ## Verification
 
@@ -80,4 +84,4 @@ See `VERIFICATION.md` for the precise checks completed and remaining limitations
 
 ## Assets
 
-All town graphics and sound synthesis are original code. Bundled DM Sans, DM Mono and Fraunces font files are redistributed with their SIL Open Font License notices in `public/fonts/`. Third-party npm dependencies retain their own licenses. No reference-site artwork, music or game code is used.
+All town graphics and sound synthesis are original code. Bundled DM Sans, DM Mono and Fraunces font files are redistributed with their SIL Open Font License notices in `public/fonts/`. Third-party npm dependencies retain their own licenses. No artwork, music or game code from other sites is used. `public/social.png` is a screenshot of the game's opening screen, used as the link preview image.
